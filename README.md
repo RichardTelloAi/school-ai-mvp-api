@@ -1,1 +1,1 @@
-# School AI MVP API
+# School AI MVP API 
