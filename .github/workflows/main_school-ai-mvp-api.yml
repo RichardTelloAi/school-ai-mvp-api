@@ -76,13 +76,15 @@ jobs:
           echo "Contracts folder:"
           ls -la contracts
           
-     - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
+      - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
         app-name: school-ai-mvp-api
         slot-name: Production
         package: ${{ github.workspace }}
 
 
+
           
+
 
