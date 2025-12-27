@@ -33,7 +33,8 @@ class CurriculumAIResponse(BaseModel):
 # Prompt loading (fail fast)
 # --------------------------------------------------
 
-PROMPT_PATH = Path("prompts/curriculum_v1.md")
+BASE_DIR = Path(__file__).resolve().parent
+PROMPT_PATH = BASE_DIR / "prompts" / "curriculum_v1.md"
 
 if not PROMPT_PATH.exists():
     raise RuntimeError("Prompt file prompts/curriculum_v1.md not found")
