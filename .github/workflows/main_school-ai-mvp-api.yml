@@ -67,10 +67,21 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A2D226E454C746E4B4F7F195597AE6BB }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_EF724EAEFFF34D7CB237CAE278503DCC }}
 
+      - name: Verify runtime files
+        run: |
+          echo "Repo root contents:"
+          ls -la
+          echo "Prompts folder:"
+          ls -la prompts
+          echo "Contracts folder:"
+          ls -la contracts
+          
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'school-ai-mvp-api'
-          slot-name: 'Production'
+        app-name: 'school-ai-mvp-api'
+        slot-name: 'Production'
+        package: .
+
           
