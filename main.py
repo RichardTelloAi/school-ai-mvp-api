@@ -63,11 +63,11 @@ IMPORTANT:
 - Follow the schema exactly
 - No explanations or markdown
 
-Subject: {subject}
-Grade: {grade}
+Subject: <<SUBJECT>>
+Grade: <<GRADE>>
 
 Curriculum text:
-{curriculum}
+<<CURRICULUM>>
 
 Output schema:
 {
@@ -185,11 +185,12 @@ def health():
 def parse_curriculum(data: CurriculumRequest):
     client, deployment = get_openai_client()
 
-    prompt = CURRICULUM_V1_PROMPT.format(
-        subject=data.subject,
-        grade=data.grade,
-        curriculum=data.curriculum
-    )
+   prompt = (
+    CURRICULUM_V1_PROMPT
+    .replace("<<SUBJECT>>", data.subject)
+    .replace("<<GRADE>>", data.grade)
+    .replace("<<CURRICULUM>>", data.curriculum)
+)
 
     try:
         response = client.chat.completions.create(
