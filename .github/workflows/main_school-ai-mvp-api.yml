@@ -76,15 +76,23 @@ jobs:
           echo "Contracts folder:"
           ls -la contracts
           
+      - name: Zip source code
+        run: |
+          zip -r app.zip . \
+            -x "*.git*" \
+            -x ".github/workflows/*"
+
       - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v3
-      with:
-        app-name: school-ai-mvp-api
-        slot-name: Production
-        package: ${{ github.workspace }}
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: school-ai-mvp-api
+          slot-name: Production
+          package: app.zip
+
 
 
 
           
+
 
 
