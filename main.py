@@ -1,4 +1,5 @@
 import os
+import json
 from typing import List, Literal
 
 from fastapi import FastAPI, HTTPException
@@ -50,7 +51,7 @@ class TestV1Response(BaseModel):
 
 
 # ==================================================
-# Embedded Prompts (Azure-safe)
+# Embedded Prompts (JSON-safe)
 # ==================================================
 
 CURRICULUM_V1_PROMPT = """
@@ -102,14 +103,14 @@ CRITICAL RULES:
 - Each question must link to ONE learning objective
 - Each question must test ONE skill
 
-Subject: {subject}
-Grade: {grade}
-Purpose: {purpose}
-Difficulty mix: {difficulty_mix}
-Estimated duration: {duration_minutes} minutes
+Subject: <<SUBJECT>>
+Grade: <<GRADE>>
+Purpose: <<PURPOSE>>
+Difficulty mix: <<DIFFICULTY_MIX>>
+Estimated duration: <<DURATION>> minutes
 
 Learning objectives:
-{learning_objectives_json}
+<<LEARNING_OBJECTIVES_JSON>>
 
 OUTPUT SCHEMA:
 {
@@ -134,7 +135,7 @@ Return JSON only.
 
 
 # ==================================================
-# Utility – Azure OpenAI Client (Lazy)
+# Azure OpenAI Client (Lazy + Safe)
 # ==================================================
 
 def get_openai_client():
@@ -185,12 +186,12 @@ def health():
 def parse_curriculum(data: CurriculumRequest):
     client, deployment = get_openai_client()
 
-   prompt = (
-    CURRICULUM_V1_PROMPT
-    .replace("<<SUBJECT>>", data.subject)
-    .replace("<<GRADE>>", data.grade)
-    .replace("<<CURRICULUM>>", data.curriculum)
-)
+    prompt = (
+        CURRICULUM_V1_PROMPT
+        .replace("<<SUBJECT>>", data.subject)
+        .replace("<<GRADE>>", data.grade)
+        .replace("<<CURRICULUM>>", data.curriculum)
+    )
 
     try:
         response = client.chat.completions.create(
@@ -232,13 +233,17 @@ def generate_test(data: TestGenerateRequest):
         for lo in data.learning_objectives
     ]
 
-    prompt = TEST_V1_PROMPT.format(
-        subject=data.subject,
-        grade=data.grade,
-        purpose=data.purpose,
-        difficulty_mix=data.difficulty_mix,
-        duration_minutes=data.duration_minutes,
-        learning_objectives_json=learning_objectives_json
+    prompt = (
+        TEST_V1_PROMPT
+        .replace("<<SUBJECT>>", data.subject)
+        .replace("<<GRADE>>", data.grade)
+        .replace("<<PURPOSE>>", data.purpose)
+        .replace("<<DIFFICULTY_MIX>>", data.difficulty_mix)
+        .replace("<<DURATION>>", str(data.duration_minutes))
+        .replace(
+            "<<LEARNING_OBJECTIVES_JSON>>",
+            json.dumps(learning_objectives_json, indent=2)
+        )
     )
 
     try:
