@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from typing import List
 
 from fastapi import FastAPI, HTTPException
@@ -30,16 +29,53 @@ class CurriculumAIResponse(BaseModel):
     notes_for_teacher: str
 
 # --------------------------------------------------
-# Prompt loading (fail fast)
+# Prompt template (embedded – Azure App Service safe)
 # --------------------------------------------------
 
-BASE_DIR = Path(__file__).resolve().parent
-PROMPT_PATH = BASE_DIR / "prompts" / "curriculum_v1.md"
+CURRICULUM_V1_PROMPT = """
+You are an expert curriculum analyst assisting a school teacher.
 
-if not PROMPT_PATH.exists():
-    raise RuntimeError("Prompt file prompts/curriculum_v1.md not found")
+Your task is to analyse the provided curriculum text and return a structured draft that the teacher can review and edit.
 
-PROMPT_TEMPLATE = PROMPT_PATH.read_text()
+IMPORTANT:
+- You must follow the output schema exactly
+- You must respect all content constraints
+- Your response must be valid JSON only
+- Do not include explanations, markdown, or additional text
+
+--------------------------------------------------
+CONTEXT
+--------------------------------------------------
+Subject: {subject}
+Grade: {grade}
+
+--------------------------------------------------
+CURRICULUM TEXT
+--------------------------------------------------
+{curriculum}
+
+--------------------------------------------------
+OUTPUT SCHEMA (JSON ONLY)
+--------------------------------------------------
+{
+  "summary": "string",
+  "topics": [
+    { "name": "string" }
+  ],
+  "learning_objectives": [
+    {
+      "id": "string",
+      "objective": "string",
+      "skill_type": "reading | writing | listening | speaking | grammar",
+      "assessment_weight": "low | medium | high"
+    }
+  ],
+  "difficulty_assessment": "too_easy | appropriate | too_hard",
+  "notes_for_teacher": "string"
+}
+
+Return valid JSON only.
+"""
 
 # --------------------------------------------------
 # Azure OpenAI client
@@ -65,7 +101,7 @@ def health():
 
 @app.post("/curriculum/parse", response_model=CurriculumAIResponse)
 def parse_curriculum(data: CurriculumRequest):
-    prompt = PROMPT_TEMPLATE.format(
+    prompt = CURRICULUM_V1_PROMPT.format(
         subject=data.subject,
         grade=data.grade,
         curriculum=data.curriculum
@@ -75,15 +111,21 @@ def parse_curriculum(data: CurriculumRequest):
         response = client.chat.completions.create(
             model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
             messages=[
-                {"role": "system", "content": "You output valid JSON only."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "You are a strict JSON API. Output JSON only."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
             ],
             temperature=0.2
         )
 
         ai_content = response.choices[0].message.content
 
-        # Validate strictly against the locked contract
+        # Strict validation against Phase 1 contract
         return CurriculumAIResponse.model_validate_json(ai_content)
 
     except ValidationError:
