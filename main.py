@@ -199,8 +199,7 @@ def parse_curriculum(data: CurriculumRequest):
             messages=[
                 {"role": "system", "content": "You are a strict JSON API."},
                 {"role": "user", "content": prompt}
-            ],
-            temperature=0.2
+            ]
         )
 
         return CurriculumAIResponse.model_validate_json(
@@ -252,8 +251,7 @@ def generate_test(data: TestGenerateRequest):
             messages=[
                 {"role": "system", "content": "You are a strict JSON API."},
                 {"role": "user", "content": prompt}
-            ],
-            temperature=0.2
+            ]
         )
 
         return TestV1Response.model_validate_json(
