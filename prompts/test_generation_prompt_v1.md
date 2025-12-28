@@ -32,6 +32,21 @@ You MUST NOT invent learning objectives or identifiers.
 
 ---
 
+## READING CONTEXT ASSUMPTION
+
+Some questions may refer to a reading passage (e.g. “Read the text…”).
+
+Assume that any required reading text is:
+- Provided separately by the teacher, curriculum, or textbook
+- NOT generated as part of this task
+
+You MUST NOT generate reading passages or source texts.
+
+Your responsibility is ONLY to generate assessment questions that
+evaluate comprehension of an assumed text.
+
+---
+
 ## OUTPUT CONTRACT (MANDATORY)
 
 You MUST produce output that conforms EXACTLY to the contract defined in:
