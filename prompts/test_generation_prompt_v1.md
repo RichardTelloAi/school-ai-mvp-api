@@ -117,6 +117,12 @@ Rules:
 - Set `max_score` proportionally to expected student effort
 - Ensure each learning objective is meaningfully assessed
 
+When generating main idea questions:
+- Ensure the correct answer clearly summarizes the entire paragraph
+- Avoid main idea answers that describe only mood, setting, or a single detail
+- Ensure distractors are clearly supporting details or incorrect interpretations
+- Avoid questions where more than one answer could reasonably be defended
+
 ---
 
 ## QUANTITY GUIDANCE
