@@ -95,6 +95,12 @@ Rules:
 - Prefer authentic assessment over memorization when appropriate
 - Distractors in multiple-choice questions should be plausible but clearly incorrect
 - Keep questions focused on the stated learning objective
+- Choose `skill_type` to clearly reflect the cognitive demand of the question
+- Prefer:
+  - `recall` / `understanding` for mcq
+  - `application` / `analysis` for short_answer
+- Set `max_score` proportionally to expected student effort
+- Ensure each learning objective is meaningfully assessed
 
 ---
 
