@@ -2,8 +2,12 @@ import os
 import json
 from typing import List, Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel, ValidationError
+from sqlalchemy.orm import Session
+
+from database import get_db
+from services.curriculum_service import CurriculumService
 
 app = FastAPI()
 
@@ -173,7 +177,7 @@ def get_openai_client():
 
 
 # ==================================================
-# Endpoints
+# Health
 # ==================================================
 
 @app.get("/")
@@ -181,7 +185,10 @@ def health():
     return {"status": "ok"}
 
 
-# ---------- Phase 1 ----------
+# ==================================================
+# Phase 1 – Curriculum Parsing (AI)
+# ==================================================
+
 @app.post("/curriculum/parse", response_model=CurriculumAIResponse)
 def parse_curriculum(data: CurriculumRequest):
     client, deployment = get_openai_client()
@@ -218,7 +225,10 @@ def parse_curriculum(data: CurriculumRequest):
         )
 
 
-# ---------- Phase 2 ----------
+# ==================================================
+# Phase 2 – Test Generation (AI)
+# ==================================================
+
 @app.post("/test/generate", response_model=TestV1Response)
 def generate_test(data: TestGenerateRequest):
     client, deployment = get_openai_client()
@@ -268,3 +278,25 @@ def generate_test(data: TestGenerateRequest):
             status_code=500,
             detail=f"Azure OpenAI request failed: {str(e)}"
         )
+
+
+# ==================================================
+# Phase 4 – Curriculum Persistence (DB)
+# ==================================================
+
+@app.post("/curricula")
+def save_curriculum(payload: dict, db: Session = Depends(get_db)):
+    return CurriculumService.save_curriculum(db, payload)
+
+
+@app.get("/curricula")
+def list_curricula(db: Session = Depends(get_db)):
+    return CurriculumService.list_curricula(db)
+
+
+@app.get("/curricula/{curriculum_id}")
+def get_curriculum(curriculum_id: int, db: Session = Depends(get_db)):
+    curriculum = CurriculumService.get_curriculum(db, curriculum_id)
+    if not curriculum:
+        raise HTTPException(status_code=404, detail="Curriculum not found")
+    return curriculum
